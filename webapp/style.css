@@ -147,3 +147,10 @@ td.name, th.name { text-align: left; }
 }
 
 .empty { text-align: center; color: var(--ink-soft); padding: 40px 20px; }
+.muted { color: var(--ink-soft); font-weight: 400; font-size: 0.9em; }
+
+/* 히트맵 */
+table.heat { font-size: 13px; }
+table.heat th { background: rgba(37,99,235,.06); position: sticky; }
+table.heat td { padding: 6px 8px; min-width: 30px; border-bottom: 1px solid var(--line); }
+table.heat tbody th { text-align: center; font-weight: 700; }
