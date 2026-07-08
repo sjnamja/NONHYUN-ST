@@ -26,6 +26,15 @@
     <label>분석 대상(부위·기기)
       <select id="machineSelect"></select>
     </label>
+    <label>분석 기간
+      <input type="date" id="periodFrom" /> ~ <input type="date" id="periodTo" />
+    </label>
+    <label>연도
+      <select id="yearPreset"><option value="">전체 기간</option></select>
+    </label>
+    <button id="periodReset" class="btn btn-ghost">전체기간</button>
+  </div>
+  <div class="control-row" style="padding-top:0">
     <span id="dataStatus" class="data-status"></span>
   </div>
 
@@ -36,6 +45,7 @@
     <button class="tab" data-tab="rq3">RQ3 정체기</button>
     <button class="tab" data-tab="rq4">RQ4 운동빈도</button>
     <button class="tab" data-tab="body">체성분</button>
+    <button class="tab" data-tab="ops">시설운영</button>
   </nav>
 
   <main id="main">
@@ -124,6 +134,24 @@
         <div class="card"><h3>유산소 병행 여부별 체지방률·내장지방 변화</h3><div class="chart-box"><canvas id="chBodyAero"></canvas></div></div>
       </div>
       <p class="note" id="bodyNote"></p>
+    </section>
+
+    <!-- 시설운영 -->
+    <section class="panel" data-panel="ops">
+      <p class="lead">시설 운영 관점: <b>연도별 이용 인원·성비</b>와 <b>요일·시간대 집중도</b>가 2023년 이후 어떻게 변해왔는지 봅니다. <span class="muted">(이 탭은 상단 기간 선택과 무관하게 전체 기간을 연도별로 비교합니다.)</span></p>
+      <div class="grid2">
+        <div class="card"><h3>연도별 이용 인원·세션 추이</h3><div class="chart-box"><canvas id="chOpsTrend"></canvas></div></div>
+        <div class="card"><h3>연도별 남녀 이용 인원 (성비)</h3><div class="chart-box"><canvas id="chOpsGender"></canvas></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>요일별 이용 분포 (연도 비교)</h3><div class="chart-box"><canvas id="chOpsDow"></canvas></div></div>
+        <div class="card"><h3>시간대별 이용 분포 (연도 비교)</h3><div class="chart-box"><canvas id="chOpsHour"></canvas></div></div>
+      </div>
+      <div class="card">
+        <h3>요일 × 시간대 집중도 히트맵 (전체 기간)</h3>
+        <div class="table-wrap" id="opsHeat"></div>
+        <p class="note" id="opsNote"></p>
+      </div>
     </section>
   </main>
 
