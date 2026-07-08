@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>스마트피트니스 근력운동 건강영향 분석</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">💪</span>
+      <div>
+        <h1>스마트피트니스 근력운동 건강영향 분석</h1>
+        <p class="sub">논현노인종합복지관 · 실시간 누적 분석 대시보드</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="modeBadge" class="badge">준비 중…</span>
+      <button id="reloadBtn" class="btn" title="스프레드시트 다시 읽기">↻ 새로고침</button>
+      <button id="settingsBtn" class="btn btn-ghost">⚙ 설정</button>
+    </div>
+  </header>
+
+  <div class="control-row">
+    <label>분석 대상(부위·기기)
+      <select id="machineSelect"></select>
+    </label>
+    <span id="dataStatus" class="data-status"></span>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview">개요</button>
+    <button class="tab" data-tab="rq1">RQ1 근력수준</button>
+    <button class="tab" data-tab="rq2">RQ2 근력추이</button>
+    <button class="tab" data-tab="rq3">RQ3 정체기</button>
+    <button class="tab" data-tab="rq4">RQ4 운동빈도</button>
+    <button class="tab" data-tab="body">체성분</button>
+  </nav>
+
+  <main id="main">
+    <!-- 개요 -->
+    <section class="panel active" data-panel="overview">
+      <div class="kpis" id="kpis"></div>
+      <div class="grid2">
+        <div class="card"><h3>월별 운동 세션 수</h3><div class="chart-box"><canvas id="chSessions"></canvas></div></div>
+        <div class="card"><h3>근감소증 위험군(SMI 기준) 비율</h3><div class="chart-box"><canvas id="chSarco"></canvas></div></div>
+      </div>
+      <div class="card"><h3>연령대·성별 참여 분포</h3><div class="chart-box"><canvas id="chDemo"></canvas></div></div>
+    </section>
+
+    <!-- RQ1 -->
+    <section class="panel" data-panel="rq1">
+      <p class="lead">선택한 대상의 근력을 성별·연령대로 나눠 수준(백분위)을 봅니다. 개인의 위치를 조회할 수 있습니다.</p>
+      <p class="hint" id="rq1Hint"></p>
+      <div class="card"><h3>연령대별 근력 중앙값 (성별 구분)</h3><div class="chart-box"><canvas id="chRq1Bar"></canvas></div></div>
+      <div class="card">
+        <h3>성별×연령대 백분위표 (P10/25/50/75/90)</h3>
+        <div class="table-wrap"><table id="tblRq1"></table></div>
+      </div>
+      <div class="card">
+        <h3>개인 위치 조회</h3>
+        <div class="inline-form">
+          <select id="rq1Member"></select>
+          <span id="rq1Result" class="result"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RQ2 -->
+    <section class="panel" data-panel="rq2">
+      <p class="lead">개인별 <b>근력의 시간 기울기</b>(월당 변화)로 향상·유지·감소를 판정하고, 운동빈도와의 관계를 봅니다.</p>
+      <p class="hint" id="rq2Hint"></p>
+      <div class="grid2">
+        <div class="card"><h3>근력 변화 기울기 분포(월당)</h3><div class="chart-box"><canvas id="chRq2Hist"></canvas></div></div>
+        <div class="card"><h3>향상 / 유지 / 감소 비율</h3><div class="chart-box"><canvas id="chRq2Pie"></canvas></div></div>
+      </div>
+      <div class="card"><h3>운동빈도군별 평균 기울기</h3><div class="chart-box"><canvas id="chRq2Freq"></canvas></div></div>
+      <p class="note" id="rq2Note"></p>
+    </section>
+
+    <!-- RQ3 -->
+    <section class="panel" data-panel="rq3">
+      <p class="lead">운동 시작 후 <b>경과 개월</b> 대비 (개인 내 표준화한) 근력을 모아 <b>정체기 변곡점</b>을 분절회귀로 추정합니다.</p>
+      <p class="hint" id="rq3Hint"></p>
+      <div class="card">
+        <h3>경과기간 대비 근력 곡선 · 정체 시작점</h3>
+        <div class="chart-box tall"><canvas id="chRq3"></canvas></div>
+      </div>
+      <p class="note" id="rq3Note"></p>
+    </section>
+
+    <!-- RQ4 -->
+    <section class="panel" data-panel="rq4">
+      <p class="lead">연간 세션 수 구간별로 <b>근력 변화량(마지막−처음)</b>을 비교하여, 효과가 나타나는 빈도 임계를 탐색합니다.</p>
+      <p class="hint" id="rq4Hint"></p>
+      <div class="card"><h3>운동빈도군별 평균 근력 변화량</h3><div class="chart-box"><canvas id="chRq4"></canvas></div></div>
+      <div class="card"><h3>빈도군 요약</h3><div class="table-wrap"><table id="tblRq4"></table></div></div>
+      <p class="note" id="rq4Note"></p>
+    </section>
+
+    <!-- 체성분 -->
+    <section class="panel" data-panel="body">
+      <p class="lead">SMI·체지방률(PBF)·내장지방(VFL) 추이를 <b>운동 부위(상체/하체)</b>와 <b>유산소 병행 여부</b>로 나눠 봅니다.</p>
+
+      <div class="card">
+        <h3>운동 부위별 InBody 변화 비교</h3>
+        <div class="chart-box"><canvas id="chBodyRegion"></canvas></div>
+        <p class="note" id="bodyRegionNote"></p>
+      </div>
+
+      <div class="control-row" style="padding-left:0">
+        <label>인바디 대상(운동 부위)
+          <select id="bodyRegionSelect">
+            <option value="all">전체</option>
+            <option value="상체 위주">상체 위주 참여자</option>
+            <option value="하체 위주">하체 위주 참여자</option>
+            <option value="상하체 균형">상하체 균형</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>SMI 변화 (첫 측정 → 최근)</h3><div class="chart-box"><canvas id="chBodySmi"></canvas></div></div>
+        <div class="card"><h3>유산소 병행 여부별 체지방률·내장지방 변화</h3><div class="chart-box"><canvas id="chBodyAero"></canvas></div></div>
+      </div>
+      <p class="note" id="bodyNote"></p>
+    </section>
+  </main>
+
+  <!-- 설정 모달 -->
+  <div class="modal-backdrop" id="settingsModal" hidden>
+    <div class="modal">
+      <h2>⚙ 스프레드시트 연결 설정</h2>
+      <p class="modal-help">구글 시트 → 파일 → 공유 → <b>웹에 게시</b> → 각 탭을 <b>CSV</b>로 게시하고 URL을 붙여넣으세요.</p>
+      <label>운동로그 CSV URL
+        <input type="url" id="inpExercise" placeholder="https://docs.google.com/…/pub?gid=0&single=true&output=csv" />
+      </label>
+      <label>인바디 CSV URL
+        <input type="url" id="inpInbody" placeholder="https://docs.google.com/…/pub?gid=…&single=true&output=csv" />
+      </label>
+      <div class="modal-actions">
+        <button id="useDemo" class="btn btn-ghost">데모 데이터로 보기</button>
+        <div>
+          <button id="cancelSettings" class="btn btn-ghost">취소</button>
+          <button id="saveSettings" class="btn btn-primary">저장 후 불러오기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="js/csv.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/demo.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
